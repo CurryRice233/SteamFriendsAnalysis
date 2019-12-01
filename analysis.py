@@ -19,16 +19,18 @@ no_data_players = 0
 
 for friend in friends:
     if friend.games is not None and len(friend.games) > 0 and "hours_forever" in friend.games[0]:
-        game_name = friend.games[0]['name']
-        hours = float(friend.games[0]['hours_forever'].replace(',', ''))
-        if friend.games[0]['name'] in games:
-            games[game_name].players += 1
-            games[game_name].hours += hours
-            if games[game_name].max_hours < hours:
-                games[game_name].max_hours = hours
-                games[game_name].max_player = friend.name
-        else:
-            games[game_name] = Game(game_name, 1, hours, friend.name, hours)
+        for game in friend.games:
+            if "hours_forever" in game:
+                game_name = game['name']
+                hours = float(game['hours_forever'].replace(',', ''))
+                if game['name'] in games:
+                    games[game_name].players += 1
+                    games[game_name].hours += hours
+                    if games[game_name].max_hours < hours:
+                        games[game_name].max_hours = hours
+                        games[game_name].max_player = friend.name
+                else:
+                    games[game_name] = Game(game_name, 1, hours, friend.name, hours)
 
     else:
         no_data_players += 1
@@ -40,14 +42,20 @@ game_name = []
 game_hours = []
 game_max = []
 
-for game in sorted_games:
-    game_name.append(games[game].name)
-    game_hours.append(games[game].hours)
-    game_max.append(games[game].max_hours)
-    print("\nGame Name: " + games[game].name + "\n"+str(games[game].players)+" player with " + str(games[game].hours) + "h\nMax Player: " +
-          str(games[game].max_player) + " was played " + str(games[game].max_hours) + "h")
+top = 30
 
-plt.subplots_adjust(left=0.2)
+if len(sorted_games) < top:
+    top = len(sorted_games)
+
+
+for game in list(sorted_games.values())[:top]:
+    game_name.append(game.name)
+    game_hours.append(round(game.hours, 1))
+    game_max.append(round(game.max_hours, 1))
+    print("\nGame Name: " + game.name + "\n" + str(game.players) + " player with " + str(game.hours) + "h\nMax Player: " +
+          str(game.max_player) + " was played " + str(game.max_hours) + "h")
+
+plt.subplots_adjust(top=0.99, bottom=0.05, left=0.2, right=0.99)
 plt.barh(range(len(game_name)), game_hours, label='Total Hours')
 plt.barh(range(len(game_name)), game_max, label='Max Played', tick_label=game_name)
 plt.gca().invert_yaxis()
