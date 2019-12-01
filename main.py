@@ -1,9 +1,9 @@
 import requests
 import re
 import json
+import pickle
 from bs4 import BeautifulSoup
 from player import Player
-
 
 url = 'https://steamcommunity.com/profiles/76561198158810211/friends/'  # Your profiles
 cookies = {'steamLoginSecure': 'Your Cookie'}
@@ -41,6 +41,9 @@ for i in range(len(names)):
         info += "\nNo game found!"
     print(info)
 
+f = open("./data.txt", 'wb')
+pickle.dump(friends, f)
+f.close()
 '''
 for friend in friends:
     print("\nname: " + friend.name + "\tlink: " + friend.link + "\tgame: " + friend.games[0].name)
